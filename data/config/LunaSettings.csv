@@ -1,0 +1,2 @@
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
+trap_mode,Trap Mode,Boolean,false,,"Traps you in campaign permanently. Once enabled can only be disabled by disabling the mod or editing the LunaSettings file.",,,

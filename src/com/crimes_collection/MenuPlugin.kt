@@ -1,5 +1,6 @@
 package com.crimes_collection
 
+import com.crimes_collection.luna.Settings
 import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.combat.BaseEveryFrameCombatPlugin
 import com.fs.starfarer.api.combat.CombatEngineAPI
@@ -18,7 +19,18 @@ import kotlin.math.roundToInt
 @Suppress("unused")
 class MenuPlugin : BaseEveryFrameCombatPlugin() {
     companion object {
-        var complete = false
+        private var _complete = false
+        var complete: Boolean
+            get() {
+                return if (Global.getSettings().modManager.isModEnabled("lunalib") && Settings.trapMod) {
+                    false
+                } else {
+                    _complete
+                }
+            }
+            set(value) {
+                _complete = value
+            }
     }
 
     private lateinit var engine: CombatEngineAPI
