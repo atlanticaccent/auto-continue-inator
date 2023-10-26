@@ -13,8 +13,6 @@ import com.fs.starfarer.title.TitleScreenState
 import com.fs.starfarer.util.A.Object
 import com.fs.state.AppDriver
 import com.fs.state.AppState
-import java.lang.invoke.MethodHandles
-import java.lang.invoke.MethodType
 import kotlin.math.roundToInt
 
 @Suppress("unused")
@@ -34,27 +32,10 @@ class MenuPlugin : BaseEveryFrameCombatPlugin() {
         this.engine = engine
     }
 
-    private fun getScreenPanel() : UIPanelAPI {
-        val title = state as TitleScreenState
-
-        val methodClass = Class.forName("java.lang.reflect.Method", false, Class::class.java.classLoader)
-        val getNameMethod = MethodHandles.lookup().findVirtual(methodClass, "getName", MethodType.methodType(String::class.java))
-        val invokeMethod = MethodHandles.lookup().findVirtual(methodClass, "invoke", MethodType.methodType(Any::class.java, Any::class.java, Array<Any>::class.java))
-
-        var foundMethod: Any? = null
-        for (method in title::class.java.methods as Array<*>) {
-            if (getNameMethod.invoke(method) == "getScreenPanel") {
-                foundMethod = method
-            }
-        }
-
-        return invokeMethod.invoke(foundMethod, title) as UIPanelAPI
-    }
-
     override fun processInputPreCoreControls(amount: Float, events: MutableList<InputEventAPI>) {
         if (complete) return
         (state as? TitleScreenState)?.let {
-            val screenPanel = getScreenPanel()
+            val screenPanel = ReflectionUtils.invoke("getScreenPanel", it) as UIPanelAPI
             val buttonHolder = screenPanel.getChildrenCopy()[0].getChildrenCopy()[0]
             val curr = ReflectionUtils.invoke("getCurr", buttonHolder) as UIPanelAPI
             val continueButton =
