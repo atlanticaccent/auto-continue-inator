@@ -19,12 +19,15 @@ import kotlin.math.roundToInt
 
 @Suppress("unused")
 class MenuPlugin : BaseEveryFrameCombatPlugin() {
+    companion object {
+        var complete = false
+    }
+
     private lateinit var engine: CombatEngineAPI
     private val state: AppState?
         get() = AppDriver.getInstance().currentState
     private var flip = false
     private var doHack = true
-    private var complete = false
 
     @Suppress("OVERRIDE_DEPRECATION")
     override fun init(engine: CombatEngineAPI) {
