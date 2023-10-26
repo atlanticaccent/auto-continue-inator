@@ -27,7 +27,7 @@ val shouldAutomaticallyCreateMetadataFiles = true
 /**
  * Modify these if you wish to have mod_info.json and the Version Checker files updated for you automatically.
  */
-val modVersion = "0.0.0"
+val modVersion = "0.0.1"
 val jarFileName = "${modName}.jar"
 val modId = "auto_continue_inator"
 val modAuthor = "AtlanticAccent"
