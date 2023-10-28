@@ -27,7 +27,7 @@ val shouldAutomaticallyCreateMetadataFiles = true
 /**
  * Modify these if you wish to have mod_info.json and the Version Checker files updated for you automatically.
  */
-val modVersion = "0.0.1"
+val modVersion = "0.0.2"
 val jarFileName = "${modName}.jar"
 val modId = "auto_continue_inator"
 val modAuthor = "AtlanticAccent"
@@ -190,9 +190,7 @@ tasks {
     // If enabled, will copy your mod to the /mods directory when run (and whenever gradle syncs).
     // Disabled by default, as it is not needed if your mod directory is symlinked into your /mods folder.
     register<Copy>("install-mod") {
-        val enabled = true;
-
-        if (!enabled) return@register
+        dependsOn("jar", "create-metadata-files")
 
         println("Installing mod into Starsector mod folder...")
 
@@ -214,7 +212,7 @@ tasks {
     }
 
     register<Zip>("zip") {
-        dependsOn("jar")
+        dependsOn("jar", "create-metadata-files")
 
         from(projectDir)
         exclude(".git", ".github", ".gradle", ".idea", ".run", "gradle")
