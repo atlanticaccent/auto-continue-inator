@@ -11,7 +11,6 @@ import com.fs.starfarer.api.ui.ButtonAPI
 import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.ui.UIPanelAPI
 import com.fs.starfarer.title.TitleScreenState
-import com.fs.starfarer.util.A.Object
 import com.fs.state.AppDriver
 import com.fs.state.AppState
 import kotlin.math.roundToInt
@@ -46,21 +45,25 @@ class MenuPlugin : BaseEveryFrameCombatPlugin() {
 
     override fun processInputPreCoreControls(amount: Float, events: MutableList<InputEventAPI>) {
         if (complete) return
-        (state as? TitleScreenState)?.let {
-            val screenPanel = ReflectionUtils.invoke("getScreenPanel", it) as UIPanelAPI
+        (state as? TitleScreenState)?.let { titleState ->
+            val screenPanel = ReflectionUtils.invoke("getScreenPanel", titleState) as UIPanelAPI
             val buttonHolder = screenPanel.getChildrenCopy()[0].getChildrenCopy()[0]
             val curr = ReflectionUtils.invoke("getCurr", buttonHolder) as UIPanelAPI
             val continueButton =
                 curr.getChildrenCopy()[0].getChildrenCopy().firstOrNull { (it as ButtonAPI).text == "Continue" }
             if (continueButton != null) {
                 val pos = ReflectionUtils.invoke("getPosition", continueButton) as PositionAPI
-                if (flip) {
-                    val event = Object(InputEventClass.MOUSE_EVENT, InputEventType.MOUSE_UP, pos.x.roundToInt(), pos.y.roundToInt(), 0, '\u0000')
-                    continueButton.processInput(listOf(event))
-                } else {
-                    val event = Object(InputEventClass.MOUSE_EVENT, InputEventType.MOUSE_DOWN, pos.x.roundToInt(), pos.y.roundToInt(), 0, '\u0000')
-                    continueButton.processInput(listOf(event))
-                }
+                val listType = ReflectionUtils.getMethodParameterTypes(continueButton, "processInputImpl")!![0]!!
+                val superclass = ReflectionUtils.invoke("getGenericSuperclass", listType)!!
+                val eventType = (ReflectionUtils.invoke("getActualTypeArguments", superclass)!! as Array<*>)[0]
+                val event = ReflectionUtils.instantiate(
+                    eventType as Class<*>, InputEventClass.MOUSE_EVENT, if (flip) {
+                        InputEventType.MOUSE_UP
+                    } else {
+                        InputEventType.MOUSE_DOWN
+                    }, pos.x.roundToInt(), pos.y.roundToInt(), 0, '\u0000'
+                )
+                continueButton.processInput(listOf(event as InputEventAPI))
                 flip = !flip
             } else {
                 doHack = false

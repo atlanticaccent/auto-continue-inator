@@ -1,4 +1,4 @@
-@file:Suppress("UsePropertyAccessSyntax")
+@file:Suppress("UsePropertyAccessSyntax", "UNCHECKED_CAST")
 
 package com.crimes_collection
 
@@ -20,9 +20,9 @@ object ReflectionUtils {
         .findVirtual(fieldClass, "setAccessible", MethodType.methodType(Void.TYPE, Boolean::class.javaPrimitiveType))
 
     private val methodClass = Class.forName("java.lang.reflect.Method", false, Class::class.java.classLoader)
-    internal val getMethodNameHandle =
+    private val getMethodNameHandle =
         MethodHandles.lookup().findVirtual(methodClass, "getName", MethodType.methodType(String::class.java))
-    internal val getMethodReturnHandle =
+    private val getMethodReturnHandle =
         MethodHandles.lookup().findVirtual(methodClass, "getReturnType", MethodType.methodType(Class::class.java))
     private val invokeMethodHandle = MethodHandles.lookup().findVirtual(
         methodClass, "invoke", MethodType.methodType(Any::class.java, Any::class.java, Array<Any>::class.java)
@@ -68,11 +68,19 @@ object ReflectionUtils {
         }
     }
 
-    internal inline fun <reified T> getMethodOfReturnType(instance: Any): String? {
+    fun getMethodOfReturnType(instance: Any, clazz: Class<*>): String? {
         val instancesOfMethods: Array<out Any> = instance.javaClass.getDeclaredMethods()
 
-        return instancesOfMethods.firstOrNull { getMethodReturnHandle.invoke(it) == T::class.java }
+        return instancesOfMethods.firstOrNull { getMethodReturnHandle.invoke(it) == clazz }
             ?.let { getMethodNameHandle.invoke(it) as String }
+    }
+
+    fun getMethodParameterTypes(instance: Any, name: String): Array<*>? {
+        val instancesOfMethods: Array<out Any> = instance.javaClass.getDeclaredMethods()
+
+        return instancesOfMethods.firstOrNull { getMethodNameHandle.invoke(it) == name }?.let {
+            invoke("getParameterTypes", it) as? Array<*>
+        }
     }
 
     fun hasVariableOfName(name: String, instance: Any): Boolean {
@@ -80,10 +88,10 @@ object ReflectionUtils {
         return instancesOfFields.any { getFieldNameHandle.invoke(it) == name }
     }
 
-    inline fun <reified T> getFieldsOfType(instance: Any): List<String> {
+    fun getFieldsOfType(instance: Any, clazz: Class<*>): List<String> {
         val instancesOfMethods: Array<out Any> = instance.javaClass.getDeclaredFields()
 
-        return instancesOfMethods.filter { getFieldTypeHandle.invoke(it) == T::class.java }
+        return instancesOfMethods.filter { getFieldTypeHandle.invoke(it) == clazz }
             .map { getFieldNameHandle.invoke(it) as String }
     }
 
@@ -113,7 +121,6 @@ object ReflectionUtils {
     }
 }
 
-@Suppress("UNCHECKED_CAST")
 fun UIComponentAPI.getChildrenCopy(): List<UIComponentAPI> {
     return ReflectionUtils.invoke("getChildrenCopy", this) as List<UIComponentAPI>
 }
