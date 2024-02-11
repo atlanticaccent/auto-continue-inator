@@ -5,15 +5,11 @@ import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.combat.BaseEveryFrameCombatPlugin
 import com.fs.starfarer.api.combat.CombatEngineAPI
 import com.fs.starfarer.api.input.InputEventAPI
-import com.fs.starfarer.api.input.InputEventClass
-import com.fs.starfarer.api.input.InputEventType
 import com.fs.starfarer.api.ui.ButtonAPI
-import com.fs.starfarer.api.ui.PositionAPI
 import com.fs.starfarer.api.ui.UIPanelAPI
 import com.fs.starfarer.title.TitleScreenState
 import com.fs.state.AppDriver
 import com.fs.state.AppState
-import kotlin.math.roundToInt
 
 @Suppress("unused")
 class MenuPlugin : BaseEveryFrameCombatPlugin() {
@@ -35,7 +31,6 @@ class MenuPlugin : BaseEveryFrameCombatPlugin() {
     private lateinit var engine: CombatEngineAPI
     private val state: AppState?
         get() = AppDriver.getInstance().currentState
-    private var flip = false
     private var doHack = true
 
     @Suppress("OVERRIDE_DEPRECATION")
@@ -52,19 +47,9 @@ class MenuPlugin : BaseEveryFrameCombatPlugin() {
             val continueButton =
                 curr.getChildrenCopy()[0].getChildrenCopy().firstOrNull { (it as ButtonAPI).text == "Continue" }
             if (continueButton != null) {
-                val pos = ReflectionUtils.invoke("getPosition", continueButton) as PositionAPI
-                val listType = ReflectionUtils.getMethodParameterTypes(continueButton, "processInputImpl")!![0]!!
-                val superclass = ReflectionUtils.invoke("getGenericSuperclass", listType)!!
-                val eventType = (ReflectionUtils.invoke("getActualTypeArguments", superclass)!! as Array<*>)[0]
-                val event = ReflectionUtils.instantiate(
-                    eventType as Class<*>, InputEventClass.MOUSE_EVENT, if (flip) {
-                        InputEventType.MOUSE_UP
-                    } else {
-                        InputEventType.MOUSE_DOWN
-                    }, pos.x.roundToInt(), pos.y.roundToInt(), 0, '\u0000'
-                )
-                continueButton.processInput(listOf(event as InputEventAPI))
-                flip = !flip
+                val listener = ReflectionUtils.invoke("getListener", continueButton)!!
+                val method = ReflectionUtils.getMethod("actionPerformed", listener, Any(), Any())
+                ReflectionUtils.invoke(method, listener, Any(), continueButton)
             } else {
                 doHack = false
             }

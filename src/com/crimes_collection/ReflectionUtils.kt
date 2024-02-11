@@ -104,6 +104,21 @@ object ReflectionUtils {
         return constructorHandle.invokeWithArguments(arguments.toList())
     }
 
+    fun getMethod(methodName: String, instance: Any, vararg arguments: Any?, declared: Boolean = false): Any {
+        val clazz = instance.javaClass
+        val args = arguments.map { it!!::class.javaPrimitiveType ?: it::class.java }
+        val methodType = MethodType.methodType(Void.TYPE, args)
+
+        return if (!declared) {
+            clazz.getMethod(methodName, *methodType.parameterArray())
+        } else {
+            clazz.getDeclaredMethod(methodName, *methodType.parameterArray())
+        }
+    }
+
+    fun invoke(method: Any, instance: Any, vararg arguments: Any?): Any? =
+        invokeMethodHandle.invoke(method, instance, arguments)
+
     fun invoke(methodName: String, instance: Any, vararg arguments: Any?, declared: Boolean = false): Any? {
         val method: Any?
 

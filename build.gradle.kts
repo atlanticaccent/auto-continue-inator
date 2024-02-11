@@ -10,12 +10,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val modName: String = rootDir.name
 val niceName = "Auto-Continue-Inator"
 
-/**
- * Where your Starsector game is installed to.
- * Note: On Linux, if you installed Starsector into your home directory, you have to write /home/<user>/ instead of ~/
- */
-val starsectorDirectory = "/Users/iain.laird/Documents/Starsector.app"
-
 // Defaults to the name of your mod, with spaces replaced by hyphens.
 val modFolderName = modName.replace(" ", "-")
 
@@ -27,12 +21,12 @@ val shouldAutomaticallyCreateMetadataFiles = true
 /**
  * Modify these if you wish to have mod_info.json and the Version Checker files updated for you automatically.
  */
-val modVersion = "0.0.2"
+val modVersion = "0.0.3"
 val jarFileName = "${modName}.jar"
 val modId = "auto_continue_inator"
 val modAuthor = "AtlanticAccent"
-val modDescription = "Crimes Collection: Auto Continue. Automatically presses continue as soon as you start the game."
-val gameVersion = "0.96a-RC10"
+val modDescription = "Crimes Collection: Auto Continue. Automatically presses continue as soon as you start the game. "
+val gameVersion = "0.97a-RC8"
 val jars = arrayOf("jars/$jarFileName")
 val isUtilityMod = false
 val masterVersionFile = "https://raw.githubusercontent.com/atlanticaccent/auto-continue-inator/master/$modId.version"
@@ -40,19 +34,23 @@ val modThreadId = "00000"
 //////////////////////
 
 // Note: On Linux, use "${starsectorDirectory}" as core directory
-val starsectorCoreDirectory = {
+val (starsectorCoreDirectory, starsectorDirectory) = run {
+    val starsectorDirectory: String
     val os = System.getProperty("os.name").toLowerCase()
     when {
         os.contains("win") -> {
-            "${starsectorDirectory}/starsector-core"
+            starsectorDirectory = "sources/windows"
+            "${starsectorDirectory}/starsector-core" to starsectorDirectory
         }
         os.contains("nix") || os.contains("nux") || os.contains("aix") -> {
-            starsectorDirectory
+            starsectorDirectory = "sources/linux"
+            starsectorDirectory to starsectorDirectory
         }
         os.contains("mac") -> {
-            "${starsectorDirectory}/Contents/Resources/Java"
+            starsectorDirectory = "sources/Starsector.app"
+            "${starsectorDirectory}/Contents/Resources/Java" to starsectorDirectory
         }
-        else -> null
+        else -> throw Exception("Unknown platform")
     }
 }
 val starsectorModDirectory = "${starsectorDirectory}/mods"
@@ -207,6 +205,7 @@ tasks {
                 exclude("jars/windows.jar")
                 exclude("jars/macos.jar")
                 exclude("jars/shared.jar")
+                exclude("sources")
             }
         }
     }
@@ -218,6 +217,7 @@ tasks {
         exclude(".git", ".github", ".gradle", ".idea", ".run", "gradle")
         exclude(".gitignore", "build.gradle.kts", "*gradle*", "README.md")
         exclude("build")
+        exclude("sources")
 
         archiveFileName.set("$niceName.zip")
     }
