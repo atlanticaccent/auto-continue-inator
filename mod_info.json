@@ -4,7 +4,7 @@
     "name": "Auto-Continue-Inator",
     "author": "AtlanticAccent",
     "utility": "false",
-    "version": { "major":"0", "minor": "0", "patch": "3" },
+    "version": { "major":"0", "minor": "0", "patch": "4" },
     "description": "Crimes Collection: Auto Continue. Automatically presses continue as soon as you start the game. ",
     "gameVersion": "0.97a-RC8",
     "jars":["jars/auto-continue-inator.jar"],
