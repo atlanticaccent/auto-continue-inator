@@ -45,11 +45,13 @@ class MenuPlugin : BaseEveryFrameCombatPlugin() {
             val buttonHolder = screenPanel.getChildrenCopy()[0].getChildrenCopy()[0]
             val curr = ReflectionUtils.invoke("getCurr", buttonHolder) as UIPanelAPI
             val continueButton =
-                curr.getChildrenCopy()[0].getChildrenCopy().firstOrNull { (it as ButtonAPI).text == "Continue" }
+                curr.getChildrenCopy()[0].getChildrenCopy().filterIsInstance<ButtonAPI>().firstOrNull { it.text == "Continue" }
             if (continueButton != null) {
                 val listener = ReflectionUtils.invoke("getListener", continueButton)!!
-                val method = ReflectionUtils.getMethod("actionPerformed", listener, Any(), Any())
-                ReflectionUtils.invoke(method, listener, Any(), continueButton)
+                if (continueButton.isEnabled) {
+                    val method = ReflectionUtils.getMethod("actionPerformed", listener, Any(), Any())
+                    ReflectionUtils.invoke(method, listener, Any(), continueButton)
+                }
             } else {
                 doHack = false
             }
